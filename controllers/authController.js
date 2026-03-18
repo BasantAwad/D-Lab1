@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const db = require('../config/database');
 const JWTUtils = require('../utils/jwt');
 const { body, validationResult } = require('express-validator');
 
@@ -88,6 +89,44 @@ class AuthController {
         return res.status(404).json({ error: 'User not found' });
       }
       res.json(user);
+    });
+  }
+
+  // Get all users (admin only)
+  static getAllUsers(req, res) {
+    User.getAll((err, users) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(users);
+    });
+  }
+
+  // Delete user (admin only)
+  static deleteUser(req, res) {
+    const userId = req.params.id;
+
+    // Prevent admin from deleting themselves
+    if (parseInt(userId) === req.user.id) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+
+    User.findById(userId, (err, user) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Delete user (you might want to add a soft delete instead)
+      const sql = `DELETE FROM users WHERE id = ?`;
+      db.query(sql, [userId], (err, result) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to delete user' });
+        }
+        res.json({ message: 'User deleted successfully' });
+      });
     });
   }
 }

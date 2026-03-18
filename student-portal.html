@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal - Course Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.8);
+            font-size: 1.1em;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            color: rgba(255,255,255,0.8);
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #4facfe;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .login-form {
+            background: rgba(255,255,255,0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 400px;
+            margin: 50px auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .dashboard {
+            display: none;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .course-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .course-card.enrolled {
+            border-left: 4px solid #28a745;
+        }
+
+        .course-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .course-instructor {
+            color: #4facfe;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .course-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .course-price {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .course-duration {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .course-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: #4facfe;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3a9efc;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .enrollments-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .enrollments-table th,
+        .enrollments-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .enrollments-table th {
+            background: #4facfe;
+            color: white;
+            font-weight: 600;
+        }
+
+        .enrollments-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            margin: 30px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4facfe;
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-graduation-cap"></i> Student Portal</h1>
+            <p>Course Management System</p>
+            <button class="logout-btn" onclick="logout()" id="logoutBtn" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <div class="nav-tabs" id="navTabs" style="display: none;">
+            <div class="nav-tab active" onclick="showTab('courses')">Available Courses</div>
+            <div class="nav-tab" onclick="showTab('enrollments')">My Enrollments</div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="login-form">
+            <h2><i class="fas fa-sign-in-alt"></i> Student Login</h2>
+            <div id="message"></div>
+            <form id="studentLoginForm">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="student@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="password" required>
+                </div>
+                <button type="submit" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            <div style="text-align: center; margin-top: 20px; color: #666;">
+                <small>Don't have an account? Ask admin to register you</small>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard">
+            <!-- Courses Tab -->
+            <div id="courses" class="tab-content active">
+                <h2 class="section-title">
+                    <i class="fas fa-book"></i> Available Courses
+                </h2>
+                <div id="coursesList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading courses...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrollments Tab -->
+            <div id="enrollments" class="tab-content">
+                <h2 class="section-title">
+                    <i class="fas fa-graduation-cap"></i> My Enrollments
+                </h2>
+                <div id="enrollmentsList">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading enrollments...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        let authToken = localStorage.getItem('studentToken');
+
+        // Check if already logged in
+        if (authToken) {
+            showDashboard();
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Load tab data
+            if (tabName === 'courses') loadCourses();
+            if (tabName === 'enrollments') loadEnrollments();
+        }
+
+        // Login form handler
+        document.getElementById('studentLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            showMessage('Logging in...', 'info');
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('studentToken', authToken);
+                    showMessage('Login successful!', 'success');
+                    setTimeout(() => showDashboard(), 1000);
+                } else {
+                    showMessage(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please check if the server is running.', 'error');
+            }
+        });
+
+        // Show dashboard
+        async function showDashboard() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('navTabs').style.display = 'flex';
+            document.getElementById('logoutBtn').style.display = 'block';
+
+            loadCourses();
+        }
+
+        // Load available courses
+        async function loadCourses() {
+            const coursesList = document.getElementById('coursesList');
+            coursesList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading courses...</div>';
+
+            try {
+                // Get all courses
+                const coursesResponse = await fetch(`${API_BASE}/courses`);
+                if (!coursesResponse.ok) throw new Error('Failed to load courses');
+                const courses = await coursesResponse.json();
+
+                // Get user's enrollments to mark enrolled courses
+                const enrollmentsResponse = await fetch(`${API_BASE}/enrollments/my-enrollments`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const enrollments = enrollmentsResponse.ok ? await enrollmentsResponse.json() : [];
+                const enrolledCourseIds = enrollments.map(e => e.course_id);
+
+                if (courses.length === 0) {
+                    coursesList.innerHTML = '<p>No courses available yet.</p>';
+                    return;
+                }
+
+                coursesList.innerHTML = '<div class="courses-grid" id="coursesGrid"></div>';
+                const grid = document.getElementById('coursesGrid');
+
+                courses.forEach(course => {
+                    const isEnrolled = enrolledCourseIds.includes(course.id);
+                    if (!isEnrolled) {  // Only show courses not enrolled in
+                        const courseCard = document.createElement('div');
+                        courseCard.className = 'course-card';
+                        courseCard.innerHTML = `
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-instructor"><i class="fas fa-user"></i> ${course.instructor}</div>
+                            <div class="course-description">${course.description || 'No description available'}</div>
+                            <div class="course-meta">
+                                <div class="course-price">$${course.price}</div>
+                                <div class="course-duration"><i class="fas fa-clock"></i> ${course.duration}h</div>
+                            </div>
+                            <div class="course-actions">
+                                <button class="btn btn-primary" onclick="enrollInCourse(${course.id})">
+                                    <i class="fas fa-plus"></i> Enroll
+                                </button>
+                            </div>
+                        `;
+                        grid.appendChild(courseCard);
+                    }
+                });
+            } catch (error) {
+                coursesList.innerHTML = '<div class="message error">Failed to load courses. Please check if the server is running.</div>';
+            }
+        }
+
+        // Load user enrollments
+        async function loadEnrollments() {
+            const enrollmentsList = document.getElementById('enrollmentsList');
+            enrollmentsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading enrollments...</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/enrollments/my-enrollments`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load enrollments');
+
+                const enrollments = await response.json();
+
+                if (enrollments.length === 0) {
+                    enrollmentsList.innerHTML = '<p>You haven\'t enrolled in any courses yet.</p>';
+                    return;
+                }
+
+                enrollmentsList.innerHTML = `
+                    <table class="enrollments-table">
+                        <thead>
+                            <tr>
+                                <th>Course Title</th>
+                                <th>Instructor</th>
+                                <th>Price</th>
+                                <th>Duration</th>
+                                <th>Enrolled Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enrollmentsBody">
+                        </tbody>
+                    </table>
+                `;
+
+                const tbody = document.getElementById('enrollmentsBody');
+                enrollments.forEach(enrollment => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${enrollment.title}</td>
+                        <td>${enrollment.instructor}</td>
+                        <td>$${enrollment.price}</td>
+                        <td>${enrollment.duration}h</td>
+                        <td>${new Date(enrollment.enrolled_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="unenrollFromCourse(${enrollment.course_id})">
+                                <i class="fas fa-times"></i> Unenroll
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                enrollmentsList.innerHTML = '<div class="message error">Failed to load enrollments. Please check if the server is running.</div>';
+            }
+        }
+
+        // Enroll in course
+        async function enrollInCourse(courseId) {
+            try {
+                const response = await fetch(`${API_BASE}/enrollments/${courseId}/enroll`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    showMessage('Successfully enrolled in course!', 'success');
+                    loadCourses(); // Refresh to show enrolled status
+                } else {
+                    const error = await response.json();
+                    showMessage(error.error || 'Failed to enroll in course', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please check if the server is running.', 'error');
+            }
+        }
+
+        // Unenroll from course
+        async function unenrollFromCourse(courseId) {
+            if (!confirm('Are you sure you want to unenroll from this course?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/enrollments/${courseId}/unenroll`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (response.ok) {
+                    showMessage('Successfully unenrolled from course!', 'success');
+                    loadEnrollments(); // Refresh enrollments list
+                    loadCourses(); // Refresh courses to update enrollment status
+                } else {
+                    const error = await response.json();
+                    showMessage(error.error || 'Failed to unenroll from course', 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please check if the server is running.', 'error');
+            }
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('studentToken');
+                authToken = null;
+                // Redirect to unified login page
+                window.location.href = '/login';
+            }
+        }
+
+        // Show message function
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="${type}">${message}</div>`;
+            messageDiv.style.display = 'block';
+
+            if (type !== 'info') {
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+        }
+    </script>
+</body>
+</html>

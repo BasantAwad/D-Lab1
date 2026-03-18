@@ -1,7 +1,8 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Import database configuration
 require('./config/database');
@@ -13,7 +14,12 @@ const enrollmentRoutes = require('./routes/enrollments');
 const dashboardRoutes = require('./routes/dashboard');
 
 // Middleware
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'file://'],
+  credentials: true
+}));
 app.use(express.json());
+app.use(express.static('.')); // Serve static files from current directory
 
 // Logger middleware
 app.use((req, res, next) => {
@@ -31,6 +37,27 @@ app.use('/api/auth', authRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+
+// Serve HTML files
+app.get('/login', (req, res) => {
+  res.sendFile(__dirname + '/login.html');
+});
+
+app.get('/admin-dashboard', (req, res) => {
+  res.sendFile(__dirname + '/admin-dashboard.html');
+});
+
+app.get('/admin-panel', (req, res) => {
+  res.sendFile(__dirname + '/admin-panel.html');
+});
+
+app.get('/student-portal', (req, res) => {
+  res.sendFile(__dirname + '/student-portal.html');
+});
+
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
 
 // Health check
 app.get('/api/health', (req, res) => {
